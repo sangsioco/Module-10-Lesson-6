@@ -1,0 +1,99 @@
+<!-- Task 1: Obtaining API Key and Configuration-->
+<!-- Public key: c642fb55c89c4eb1fcf4617dffa6770e
+private key: 2563941b3d2312743f9ccabeb368fef834420aff -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvel Comics API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #fff;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        img {
+            max-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Marvel Comics Characters</h1>
+    <ul id="character-list"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <script>
+        // Task 2: Fetching Characters Using Fetch API
+
+        // Replace with your Marvel API public key
+        const publicKey = 'c642fb55c89c4eb1fcf4617dffa6770e';
+        const privateKey = '2563941b3d2312743f9ccabeb368fef834420aff';
+
+        // Marvel API base URL
+        const baseURL = 'https://gateway.marvel.com:443/v1/public/characters';
+
+        // Function to fetch Marvel Comics characters
+        async function fetchCharacters() {
+            // Generate a timestamp
+            const timestamp = Date.now();
+
+            // Generate the hash for authentication
+            const hash = md5(timestamp + privateKey + publicKey);
+
+            // Fetch data from the Marvel API
+            try {
+                const response = await fetch(`${baseURL}?apikey=${publicKey}&ts=${timestamp}&hash=${hash}`);
+                const data = await response.json();
+                console.log('Fetched Characters:', data.data.results); // Log the characters to the console
+                return data.data.results;
+            } catch (error) {
+                console.error('Error fetching characters:', error);
+            }
+        }
+
+        // MD5 hash function (You can use a library or include an implementation for hashing)
+        function md5(str) {
+            return CryptoJS.MD5(str).toString(CryptoJS.enc.Hex);
+        }
+
+        // Function to display characters on the webpage
+        function displayCharacters(characters) {
+            const characterList = document.getElementById('character-list');
+            characterList.innerHTML = ''; // Clear any existing content
+
+            characters.forEach(character => {
+                // Create list item for each character
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <h2>${character.name}</h2>
+                    <p>${character.description || 'No description available.'}</p>
+                    <img src="${character.thumbnail.path}.${character.thumbnail.extension}" alt="${character.name}">
+                `;
+                characterList.appendChild(listItem);
+            });
+        }
+
+        // Task 3: Updating User Interface Dynamically
+        // Fetch characters and update the UI
+        fetchCharacters().then(characters => {
+            if (characters) {
+                displayCharacters(characters);
+            }
+        });
+    </script>
+</body>
+</html>
